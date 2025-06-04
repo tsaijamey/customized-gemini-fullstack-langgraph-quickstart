@@ -76,12 +76,7 @@ export default function App() {
 
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const scrollViewport = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]"
-      );
-      if (scrollViewport) {
-        scrollViewport.scrollTop = scrollViewport.scrollHeight;
-      }
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [thread.messages]);
 
@@ -154,12 +149,8 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-neutral-800 text-neutral-100 font-sans antialiased">
-      <main className="flex-1 flex flex-col overflow-hidden max-w-4xl mx-auto w-full">
-        <div
-          className={`flex-1 overflow-y-auto ${
-            thread.messages.length === 0 ? "flex" : ""
-          }`}
-        >
+      <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+        <div className="flex-1 flex flex-col min-h-0">
           {thread.messages.length === 0 ? (
             <WelcomeScreen
               handleSubmit={handleSubmit}

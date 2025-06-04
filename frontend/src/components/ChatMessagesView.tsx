@@ -1,7 +1,6 @@
 import type React from "react";
 import type { Message } from "@langchain/langgraph-sdk";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Copy, CopyCheck } from "lucide-react";
+import { Loader2, Copy, CopyCheck, Download } from "lucide-react";
 import { InputForm } from "@/components/InputForm";
 import { Button } from "@/components/ui/button";
 import { useState, ReactNode } from "react";
@@ -17,7 +16,9 @@ import {
 type MdComponentProps = {
   className?: string;
   children?: ReactNode;
-  [key: string]: any;
+  href?: string;
+  target?: string;
+  rel?: string;
 };
 
 // Markdown components (from former ReportView.tsx)
@@ -168,6 +169,8 @@ interface AiMessageBubbleProps {
   mdComponents: typeof mdComponents;
   handleCopy: (text: string, messageId: string) => void;
   copiedMessageId: string | null;
+  // 新增 handleExport 回调
+  handleExport: (content: string, messageId: string) => void;
 }
 
 // AiMessageBubble Component
@@ -180,6 +183,7 @@ const AiMessageBubble: React.FC<AiMessageBubbleProps> = ({
   mdComponents,
   handleCopy,
   copiedMessageId,
+  handleExport,
 }) => {
   // Determine which activity events to show and if it's for a live loading message
   const activityForThisBubble =
@@ -201,21 +205,37 @@ const AiMessageBubble: React.FC<AiMessageBubbleProps> = ({
           ? message.content
           : JSON.stringify(message.content)}
       </ReactMarkdown>
-      <Button
-        variant="default"
-        className="cursor-pointer bg-neutral-700 border-neutral-600 text-neutral-300 self-end"
-        onClick={() =>
-          handleCopy(
-            typeof message.content === "string"
-              ? message.content
-              : JSON.stringify(message.content),
-            message.id!
-          )
-        }
-      >
-        {copiedMessageId === message.id ? "Copied" : "Copy"}
-        {copiedMessageId === message.id ? <CopyCheck /> : <Copy />}
-      </Button>
+      <div className="flex self-end space-x-2">
+        <Button
+          variant="default"
+          className="cursor-pointer bg-neutral-700 border-neutral-600 text-neutral-300"
+          onClick={() =>
+            handleExport(
+              typeof message.content === "string"
+                ? message.content
+                : JSON.stringify(message.content),
+              message.id!
+            )
+          }
+        >
+          导出 <Download className="ml-1 h-4 w-4" />
+        </Button>
+        <Button
+          variant="default"
+          className="cursor-pointer bg-neutral-700 border-neutral-600 text-neutral-300"
+          onClick={() =>
+            handleCopy(
+              typeof message.content === "string"
+                ? message.content
+                : JSON.stringify(message.content),
+              message.id!
+            )
+          }
+        >
+          {copiedMessageId === message.id ? "Copied" : "Copy"}
+          {copiedMessageId === message.id ? <CopyCheck className="ml-1 h-4 w-4" /> : <Copy className="ml-1 h-4 w-4" />}
+        </Button>
+      </div>
     </div>
   );
 };
@@ -251,9 +271,26 @@ export function ChatMessagesView({
     }
   };
 
+  const handleExport = async (content: string, messageId: string) => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 14); // YYYYMMDDHHMMSS
+      const filename = `ai_content_${timestamp}_${messageId.slice(0,8)}.md`; // 添加部分messageId确保唯一性
+      
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/markdown;charset=utf-8,' + encodeURIComponent(content));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    } catch (err) {
+      console.error("Failed to export content: ", err);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-grow" ref={scrollAreaRef}>
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 overflow-y-auto" ref={scrollAreaRef}>
         <div className="p-4 md:p-6 space-y-2 max-w-4xl mx-auto pt-16">
           {messages.map((message, index) => {
             const isLast = index === messages.length - 1;
@@ -279,6 +316,7 @@ export function ChatMessagesView({
                       mdComponents={mdComponents}
                       handleCopy={handleCopy}
                       copiedMessageId={copiedMessageId}
+                      handleExport={handleExport}
                     />
                   )}
                 </div>
@@ -309,7 +347,7 @@ export function ChatMessagesView({
               </div>
             )}
         </div>
-      </ScrollArea>
+      </div>
       <InputForm
         onSubmit={onSubmit}
         isLoading={isLoading}
