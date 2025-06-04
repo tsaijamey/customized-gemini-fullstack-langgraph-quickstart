@@ -12,6 +12,10 @@ export default function App() {
   const [historicalActivities, setHistoricalActivities] = useState<
     Record<string, ProcessedEvent[]>
   >({});
+  const [currentEffort, setCurrentEffort] = useState<string>("medium");
+  const [currentModel, setCurrentModel] = useState<string>(
+    "gemini-2.5-flash-preview-04-17"
+  );
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const hasFinalizeEventOccurredRef = useRef(false);
 
@@ -100,6 +104,11 @@ export default function App() {
   const handleSubmit = useCallback(
     (submittedInputValue: string, effort: string, model: string) => {
       if (!submittedInputValue.trim()) return;
+
+      // Update App.tsx state with the new effort and model values from InputForm
+      setCurrentEffort(effort);
+      setCurrentModel(model);
+
       setProcessedEventsTimeline([]);
       hasFinalizeEventOccurredRef.current = false;
 
@@ -139,7 +148,7 @@ export default function App() {
         reasoning_model: model,
       });
     },
-    [thread]
+    [thread, setCurrentEffort, setCurrentModel]
   );
 
   const handleCancel = useCallback(() => {
@@ -156,6 +165,10 @@ export default function App() {
               handleSubmit={handleSubmit}
               isLoading={thread.isLoading}
               onCancel={handleCancel}
+              currentEffort={currentEffort}
+              setCurrentEffort={setCurrentEffort}
+              currentModel={currentModel}
+              setCurrentModel={setCurrentModel}
             />
           ) : (
             <ChatMessagesView
@@ -166,6 +179,10 @@ export default function App() {
               onCancel={handleCancel}
               liveActivityEvents={processedEventsTimeline}
               historicalActivities={historicalActivities}
+              currentEffort={currentEffort}
+              setCurrentEffort={setCurrentEffort}
+              currentModel={currentModel}
+              setCurrentModel={setCurrentModel}
             />
           )}
         </div>

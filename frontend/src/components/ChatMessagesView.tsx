@@ -248,6 +248,10 @@ interface ChatMessagesViewProps {
   onCancel: () => void;
   liveActivityEvents: ProcessedEvent[];
   historicalActivities: Record<string, ProcessedEvent[]>;
+  currentEffort: string;
+  setCurrentEffort: (value: string) => void;
+  currentModel: string;
+  setCurrentModel: (value: string) => void;
 }
 
 export function ChatMessagesView({
@@ -258,6 +262,10 @@ export function ChatMessagesView({
   onCancel,
   liveActivityEvents,
   historicalActivities,
+  currentEffort,
+  setCurrentEffort,
+  currentModel,
+  setCurrentModel,
 }: ChatMessagesViewProps) {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
@@ -353,6 +361,10 @@ export function ChatMessagesView({
         isLoading={isLoading}
         onCancel={onCancel}
         hasHistory={messages.length > 0}
+        effort={currentEffort}
+        setEffort={setCurrentEffort}
+        model={currentModel}
+        setModel={setCurrentModel}
       />
     </div>
   );
