@@ -200,3 +200,7 @@ cython_debug/
 #.idea/
 
 backend/.langgraph_api
+
+
+# 特殊文件
+教学总结.md
