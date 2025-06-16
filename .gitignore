@@ -204,3 +204,6 @@ backend/.langgraph_api
 
 # 特殊文件
 教学总结.md
+
+# 排除 docs/HOWTO 目录下的所有文件
+docs/HOWTO/
